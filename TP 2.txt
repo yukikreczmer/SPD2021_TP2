@@ -1,0 +1,226 @@
+// C++ code
+//-----LINK DE TINKERCAD----
+//https://www.tinkercad.com/things/izCg9gkdyaS
+
+#include <LiquidCrystal.h> //biblioteca lcd
+
+LiquidCrystal lcd(2,3,4,5,6,7);//pines del lcd
+
+#define LEDFRENO 8
+#define LEDGUINIODERECHO 9
+#define LEDPOSICIONDELANTERA 10
+#define LEDGUINIOIZQUIERDO 11
+#define LEDPOSICIONTRASERA 12
+
+#define NO_BOTON 0
+#define BOTON_IZQUIERDA 1
+#define BOTON_DERECHA 2
+#define BOTON_BALIZA 3
+#define BOTON_FRENO1 4
+#define BOTON_FRENO2 5
+#define BOTON_LUCES_POSICION 6
+
+#define ESTADO_BOTON 1
+#define ESTADO_LED 1
+
+#define BOTONES A0
+int valorBoton;
+
+void setup()
+{
+  lcd.begin(16,2);//inicializacion del lcd 16 columnas 2 filas
+  
+  
+  Serial.begin(9600);// visualizar en el monitor en serie
+
+  pinMode(LEDFRENO, OUTPUT);
+  pinMode(LEDGUINIODERECHO, OUTPUT);
+  pinMode(LEDPOSICIONDELANTERA, OUTPUT);
+  pinMode(LEDGUINIOIZQUIERDO, OUTPUT);
+  pinMode(LEDPOSICIONTRASERA, OUTPUT);
+  
+  pinMode(BOTONES, INPUT);	
+}
+int botonAntes = NO_BOTON;
+
+int estBotonUno = 0;
+int estBotonDos = 0;
+int estBotonTres = 0;
+int estBotonCuatro = 0;
+int estBotonCinco = 0;
+int estBotonSeis = 0;
+
+int estadoLedGuinio = LOW;
+int estadoLedBaliza = LOW;
+int estadoLedPosicion = LOW;
+
+unsigned long millisAhora;
+unsigned long millisAntes = 0;
+
+void loop()
+{
+  millisAhora = millis();
+ 
+  int botonAhora = leerBoton();
+  if(botonAhora != NO_BOTON && botonAhora != botonAntes){
+    Serial.println(botonAhora);
+    
+    switch(botonAhora){
+      case 1:
+      	if(estBotonUno == 0){
+          	estBotonUno = 1;
+          	estBotonDos = 0;
+            EncenderGuinio();
+          
+        }else{
+          	estBotonUno = 0;
+          	estadoLedGuinio = LOW;
+        }
+      break;
+      
+      case 2:
+        if(estBotonDos == 0){
+          	estBotonUno = 0;
+          	estBotonDos = 1;
+          	estadoLedGuinio = HIGH;
+        }else{
+          	estBotonDos = 0;
+          estadoLedGuinio = LOW;
+        }
+      break;
+      
+      case 3:
+      	if(estBotonTres == 0){
+          	estBotonTres = 1;
+          	estadoLedBaliza = HIGH;
+        }else{
+          	estBotonTres = 0;
+          	estadoLedBaliza = LOW;
+        }
+      break;
+      
+      case 6:
+      	if(estBotonSeis == 0){
+          estBotonSeis = 1;
+          estadoLedPosicion = HIGH;
+        }else{
+          estBotonSeis = 0;
+          estadoLedPosicion = LOW;
+        }
+      break;
+    }
+  }
+  botonAntes = botonAhora;
+  
+  if(millisAhora - millisAntes >=250){
+
+    EncenderGuinio();
+    
+    EncenderBaliza();
+    
+  	millisAntes = millisAhora;
+  }
+  
+	EncenderFrenos(botonAhora);
+  
+  	EncenderLucesDePosicion();
+  
+  delay(50);
+}
+
+int leerBoton(){
+  int valorBoton;
+  int retorno = NO_BOTON;
+  
+  valorBoton = analogRead(BOTONES);
+  
+  if(valorBoton>350 && valorBoton<450)
+	retorno = BOTON_IZQUIERDA;  
+  
+  if(valorBoton>450 && valorBoton<550)
+	retorno = BOTON_DERECHA;
+  
+  if(valorBoton>550 && valorBoton<650)
+	retorno = BOTON_BALIZA;
+  
+  if(valorBoton>650 && valorBoton<750)
+	retorno = BOTON_FRENO1;
+  
+  if(valorBoton>750 && valorBoton<850)
+	retorno = BOTON_FRENO2;
+  
+  if(valorBoton>850 && valorBoton<950)
+	retorno = BOTON_LUCES_POSICION;
+  
+  return retorno;
+}
+
+void EncenderGuinio(){
+  if(estBotonUno == 1){
+    estadoLedGuinio = !estadoLedGuinio;
+    digitalWrite(LEDGUINIOIZQUIERDO,estadoLedGuinio);
+  }else{
+    digitalWrite(LEDGUINIOIZQUIERDO,LOW);
+    lcd.setCursor(0,0);
+    lcd.print("<");
+  }
+  if(estBotonDos == 1){
+       estadoLedGuinio = !estadoLedGuinio;
+       digitalWrite(LEDGUINIODERECHO,estadoLedGuinio);
+    }else{
+        digitalWrite(LEDGUINIODERECHO,LOW);
+        lcd.setCursor(15,0);
+        lcd.print(">");   
+    }
+}
+
+  void EncenderBaliza(){
+  
+  if(estBotonTres == 1)
+  {
+      digitalWrite(LEDGUINIOIZQUIERDO,LOW);
+      digitalWrite(LEDGUINIODERECHO,LOW);
+
+      estadoLedBaliza = !estadoLedBaliza;
+
+      digitalWrite(LEDGUINIOIZQUIERDO,estadoLedBaliza);
+      digitalWrite(LEDGUINIODERECHO,estadoLedBaliza);
+  }else
+  {
+      digitalWrite(LEDGUINIOIZQUIERDO,LOW);
+      digitalWrite(LEDGUINIODERECHO,LOW);
+  }
+}
+
+void EncenderFrenos(int botonAhora){
+  
+   if(botonAhora == BOTON_FRENO2 || botonAhora == BOTON_FRENO1){
+      digitalWrite(LEDFRENO,HIGH);
+      lcd.setCursor(7,0);
+      lcd.print("!!");
+  }else{
+    digitalWrite(LEDFRENO,LOW);
+    lcd.setCursor(7,0);
+    lcd.print("--");
+  }
+}
+
+void EncenderLucesDePosicion(){
+  
+    if(estBotonSeis == 1 || analogRead(A1) < 150){
+    digitalWrite(LEDPOSICIONDELANTERA, HIGH);
+    digitalWrite(LEDPOSICIONTRASERA, HIGH);
+    lcd.setCursor(1,1);
+    lcd.print("luces: ON");
+  }else{
+    digitalWrite(LEDPOSICIONDELANTERA, LOW);
+    digitalWrite(LEDPOSICIONTRASERA, LOW);
+    lcd.setCursor(1,1);
+    lcd.print("luces: off");
+    }
+  lcd.print(" ");// vuelve a 0 el lcd
+}
+
+
+
+
