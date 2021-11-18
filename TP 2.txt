@@ -1,6 +1,13 @@
 // C++ code
+//
 //-----LINK DE TINKERCAD----
-//https://www.tinkercad.com/things/izCg9gkdyaS
+//https://www.tinkercad.com/things/kFC4yHiwbUr
+//1F. 
+//Integrantes:
+//	Gaona Correa Emanuel
+//	Gonzalez Rodrigo
+//	Gonzalez Mauricio
+//	Kreczmer Yukio
 
 #include <LiquidCrystal.h> //biblioteca lcd
 
@@ -159,18 +166,27 @@ void EncenderGuinio(){
   if(estBotonUno == 1){
     estadoLedGuinio = !estadoLedGuinio;
     digitalWrite(LEDGUINIOIZQUIERDO,estadoLedGuinio);
+    lcd.setCursor(0, 0);
+    lcd.print(estadoLedGuinio == 1? "<":" ");
+    
   }else{
     digitalWrite(LEDGUINIOIZQUIERDO,LOW);
     lcd.setCursor(0,0);
-    lcd.print("<");
+    lcd.print(" ");
   }
   if(estBotonDos == 1){
        estadoLedGuinio = !estadoLedGuinio;
        digitalWrite(LEDGUINIODERECHO,estadoLedGuinio);
+    	lcd.setCursor(15,0);
+    	
+    
+    	
+    lcd.print(estadoLedGuinio == 1? ">":" ");
     }else{
         digitalWrite(LEDGUINIODERECHO,LOW);
         lcd.setCursor(15,0);
-        lcd.print(">");   
+        lcd.print(" ");
+    	
     }
 }
 
@@ -180,6 +196,10 @@ void EncenderGuinio(){
   {
       digitalWrite(LEDGUINIOIZQUIERDO,LOW);
       digitalWrite(LEDGUINIODERECHO,LOW);
+    lcd.setCursor(0, 0);
+    lcd.print(estadoLedBaliza == 1? "<":" ");
+    lcd.setCursor(15, 0);
+    lcd.print(estadoLedBaliza == 1? ">":" ");
 
       estadoLedBaliza = !estadoLedBaliza;
 
